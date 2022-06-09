@@ -1,0 +1,27 @@
+#!/bin/bash
+#BSUB -J test
+#BSUB -q ser
+#BSUB -n 1
+#BSUB -e %J.err
+#BSUB -o %J.out
+
+module purge
+module load intel/2018.4
+module load mpi/intel/2018.4
+module load valgrind/3.14.0
+
+#mpirun -np 1 ./imp_petsc.out -log_view > $LSB_JOBID.log 2>&1
+#mpirun -np 2 ./imp_petsc.out -log_view > $LSB_JOBID.log 2>&1
+#mpirun -np 3 ./imp_petsc.out -log_view > $LSB_JOBID.log 2>&1
+#mpirun -np 4 ./imp_petsc.out -log_view > $LSB_JOBID.log 2>&1
+mpirun -np 5 ./imp_petsc.out -log_view > $LSB_JOBID.log 2>&1
+
+
+#valgrind mpirun ./imp_petsc.out > $LSB_JOBID-valgrind.log 2>&1
+
+#mpirun -np 2 ./imp_petsc.out -ksp_type richardson -pc_type jacobi -log_view
+#mpirun -np 2 ./imp_petsc.out -ksp_type gmres -pc_type jacobi -log_view
+#mpirun -np 2 ./imp_petsc.out -ksp_type gmres -pc_type asm -log_view
+#mpirun -np 2 ./imp_petsc.out -ksp_type preonly -pc_type lu -pc_factor_mat_slover_type mumps -log_view
+#mpirun -np 2 ./imp_petsc.out -pc_asm_blocks 2 -pc_asm_overlap 1 -pc_asm_type restrict -pc_asm_local_type additive
+
