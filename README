@@ -1,0 +1,27 @@
+This is a final project of HPC.
+
+1. file exp.c:Explicit Euler written in pure C language
+
+2. dir      exp_petsc:Explicit format in conjunction with PETSC and hdf5
+   file   exp_petsc.c:Explicit format in conjunction with PETSC and hdf5
+   file      MakeFile:compiling script
+   file exp_petsc.out:Executable file
+   file        script:Submit jobs to taiyi
+
+ first run: "make exp_petsc.out", then run: "bsub<script"
+ Using "-n" and "-dt" in the script to change the grid and time resolution
+ The result data store in "exp_heat.h5"
+
+
+
+3. dir      imp_petsc:Implicit format in conjunction with PETSC and hdf5
+   file   imp_petsc.c:implicit format in conjunction with PETSC and hdf5
+   file      MakeFile:compiling script
+   file imp_petsc.out:Executable file
+   file        script:Submit jobs to taiyi
+
+ first run: "make imp_petsc.out", then run: "bsub<script"
+ Using "-n" and "-dt" in the script to change the grid and time resolution
+ The result data store in "imp_heat.h5"
+ 
+
