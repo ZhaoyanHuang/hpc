@@ -15,7 +15,7 @@ int main(int argc,char **args)
   Mat            A;             
   PetscErrorCode ierr;           
   PetscInt       i, n=100, start=0, end=n, it=0, col[3], rstart,rend,nlocal,rank,index;
-  PetscReal      rho=1.0, c=1.0, k=1.0, alpha, beta, dx, f, dt=0.00001, T=0.0, u0=0.0;
+  PetscReal      c=1.0, k=1.0, rho=1.0, f, alpha, beta, dx, dt=0.00001, T=0.0, u0=0.0;
   PetscScalar    zero = 0.0, value[3], data[3];
   PetscInt       restart = 0; 
   PetscViewer    h5; 
@@ -48,40 +48,6 @@ int main(int argc,char **args)
   ierr = VecGetOwnershipRange(x,&rstart,&rend);CHKERRQ(ierr);
   ierr = VecGetLocalSize(x,&nlocal);CHKERRQ(ierr); 
 
-  /* create matrix A */
-  ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr); 
-  ierr = MatSetSizes(A,nlocal,nlocal,n+1,n+1);CHKERRQ(ierr); 
-  ierr = MatSetFromOptions(A);CHKERRQ(ierr); 
-  ierr = MatSetUp(A);CHKERRQ(ierr); 
-
-  /* set matrix A's values */
-  if (!rstart) 
-  {
-    rstart = 1;
-    i      = 0; col[0] = 0; col[1] = 1; value[0] = 1.0-2.0*beta; value[1] = beta; 
-    ierr   = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr); 
-  }
-  
-  if (rend == n+1)
-  {
-    rend = n;
-    i    = n; col[0] = n-1; col[1] = n; value[0] = beta; value[1] = 1.0-2.0*beta;
-    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-  }
-
-  value[0] = beta; value[1] = 1.0-2.0*beta; value[2] = beta;
-  for (i=rstart; i<rend; i++) 
-  {
-    col[0] = i-1; col[1] = i; col[2] = i+1;
-    ierr   = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr); 
-  }
-
-  /* Assemble the matrix */
-  ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-  ierr = MatView(A, PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
-
-
   ierr = VecSet(z,zero);CHKERRQ(ierr);
     if(rank == 0)
     {
@@ -112,8 +78,6 @@ int main(int argc,char **args)
     index= 0;   
   }
 
-
-
   ierr = VecSet(b,zero);CHKERRQ(ierr); 
   if(rank == 0){
     for(int i = 1; i < n; i++){ 
@@ -125,7 +89,40 @@ int main(int argc,char **args)
   ierr = VecAssemblyBegin(b);CHKERRQ(ierr);
   ierr = VecAssemblyEnd(b);CHKERRQ(ierr);
 
+  /* create matrix A */
+  ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
+  ierr = MatSetSizes(A,nlocal,nlocal,n+1,n+1);CHKERRQ(ierr);
+  ierr = MatSetFromOptions(A);CHKERRQ(ierr);
+  ierr = MatSetUp(A);CHKERRQ(ierr);
 
+  /* set matrix A's values */
+  if (!rstart)
+  {
+    rstart = 1;
+    i      = 0; col[0] = 0; col[1] = 1; value[0] = 1.0-2.0*beta; value[1] = beta;
+    ierr   = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+  }
+
+  if (rend == n+1)
+  {
+    rend = n;
+    i    = n; col[0] = n-1; col[1] = n; value[0] = beta; value[1] = 1.0-2.0*beta;
+    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+  }
+
+  value[0] = beta; value[1] = 1.0-2.0*beta; value[2] = beta;
+  for (i=rstart; i<rend; i++)
+  {
+    col[0] = i-1; col[1] = i; col[2] = i+1;
+    ierr   = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
+  }
+
+  /* Assemble the matrix */
+  ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+  ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+  ierr = MatView(A, PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
+
+  /* Calculate */
   while(PetscAbsReal(T)<2.0){ 
      T += dt; 
      /*x = Az*/
