@@ -165,7 +165,7 @@ int main(int argc,char **args)
   /*Store the data */
   PetscViewer pv;
   PetscViewerCreate(PETSC_COMM_WORLD,&pv);
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"final.dat",&pv);
+  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"temp.dat",&pv);
   VecView(z, pv);
   PetscViewerDestroy(&pv);
 
